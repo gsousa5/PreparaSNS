@@ -3,9 +3,11 @@ import TaskCard from './TaskCard';
 import CustomTaskForm from './CustomTaskForm';
 import { calculateTaskTime, formatDatetimePT } from '../utils/dateUtils';
 import { downloadICSFile, scheduleAllTaskNotifications } from '../utils/notificationUtils';
+import { schedulePushNotification } from '../services/pushService';
 import { isPast } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { useTheme } from '../hooks/useTheme';
+import { useAuth } from '../context/AuthContext';
 import clsx from 'clsx';
 
 export default function Timeline({
@@ -17,6 +19,7 @@ export default function Timeline({
   onBack
 }) {
   const { isDark } = useTheme();
+  const { user } = useAuth();
   const [customTasks, setCustomTasks] = useState([]);
   const [showCustomForm, setShowCustomForm] = useState(false);
 
@@ -57,9 +60,27 @@ export default function Timeline({
   // Agendar notificações quando o componente montar
   useEffect(() => {
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      // Schedule client-side notifications (setTimeout)
       scheduleAllTaskNotifications(allTasks);
+
+      // Schedule push notifications if user is authenticated
+      if (user?.id) {
+        allTasks.forEach(task => {
+          // Don't schedule if task is in the past
+          if (!isTaskOverdue(task.scheduledTime)) {
+            schedulePushNotification(
+              user.id,
+              task.id,
+              task.scheduledTime,
+              task
+            ).catch(err => {
+              console.error(`Failed to schedule push for task ${task.id}:`, err);
+            });
+          }
+        });
+      }
     }
-  }, [allTasks]);
+  }, [allTasks, user?.id]);
 
   // Contar tarefas completas
   const completedCount = completedTasks.length;
