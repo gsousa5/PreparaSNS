@@ -117,5 +117,80 @@ export const examesData = [
         descricao_pt: "Vista-se com roupas confortáveis e de mangas soltas. Descanse um pouco para evitar quedas de tensão durante o exame."
       }
     ]
+  },
+  {
+    id: "ptgo",
+    nome: "Prova de Tolerância à Glicose (PTGO)",
+    avisos_gerais: "Venha em jejum de 8-12 horas. Evite cafeína, álcool e exercício intenso 24 horas antes. Se toma medicação, consulte o médico.",
+    passos: [
+      {
+        id: "ptgo-12",
+        horas_antecedencia: 12,
+        titulo: "Jejum Obrigatório",
+        descricao_pt: "Não comer nem beber nada (apenas água) nas 12 horas antes do exame. O jejum é essencial para um resultado fiável."
+      },
+      {
+        id: "ptgo-24",
+        horas_antecedencia: 24,
+        titulo: "Evitar Cafeína e Álcool",
+        descricao_pt: "Não consuma café, chá, refrigerantes ou bebidas alcoólicas 24 horas antes. Evite também exercício intenso."
+      },
+      {
+        id: "ptgo-2",
+        horas_antecedencia: 2,
+        titulo: "Hidratação Leve",
+        descricao_pt: "Beba um pequeno copo de água (cerca de 150ml) 1-2 horas antes para se manter hidratado."
+      }
+    ]
+  },
+  {
+    id: "ressonancia_magnetica",
+    nome: "Ressonância Magnética (RM)",
+    avisos_gerais: "Remova TODOS os objetos metálicos (relógios, piercings, tatuagens com tinta metálica). Informe o técnico de implantes ou próteses metálicas.",
+    passos: [
+      {
+        id: "rm-24",
+        horas_antecedencia: 24,
+        titulo: "Informar Sobre Implantes",
+        descricao_pt: "Se tem pacemaker, implante coclear, clip cerebral ou prótese metálica, avise o hospital imediatamente. Alguns casos são contraindicados."
+      },
+      {
+        id: "rm-2",
+        horas_antecedencia: 2,
+        titulo: "Remover Objetos Metálicos",
+        descricao_pt: "Tire colares, pulseiras, relógios, piercings, cintos com fivela, óculos e qualquer dispositivo metálico. Pode vestiário estar disponível."
+      },
+      {
+        id: "rm-1",
+        horas_antecedencia: 1,
+        titulo: "Alimentação Normal",
+        descricao_pt: "Pode comer e beber normalmente. Não há restrições dietéticas para RM. Vinha confortável."
+      }
+    ]
+  },
+  {
+    id: "prova_esforco",
+    nome: "Prova de Esforço (Teste de Stress Cardíaco)",
+    avisos_gerais: "Informe o médico sobre medicação cardíaca que toma. Vista roupa e calçado desportivo confortável. Avoid cafeína 24h antes.",
+    passos: [
+      {
+        id: "pe-24",
+        horas_antecedencia: 24,
+        titulo: "Evitar Cafeína e Estimulantes",
+        descricao_pt: "Não consuma café, chá, chocolate ou energéticos 24 horas antes. Podem interferir com o traçado cardíaco."
+      },
+      {
+        id: "pe-8",
+        horas_antecedencia: 8,
+        titulo: "Jejum Leve",
+        descricao_pt: "Coma uma refeição leve 2-3 horas antes. Evite alimentos pesados. Beba água normalmente."
+      },
+      {
+        id: "pe-2",
+        horas_antecedencia: 2,
+        titulo: "Preparação Final",
+        descricao_pt: "Vista roupa e calçado desportivo confortável. Traga uma toalha. O técnico aplicará elétrodos no peito."
+      }
+    ]
   }
 ];

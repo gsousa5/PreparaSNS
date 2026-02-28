@@ -1,9 +1,12 @@
-import { ChevronLeft, RotateCcw, Download } from 'lucide-react';
+import { ChevronLeft, RotateCcw, Download, Plus } from 'lucide-react';
 import TaskCard from './TaskCard';
+import CustomTaskForm from './CustomTaskForm';
 import { calculateTaskTime, formatDatetimePT } from '../utils/dateUtils';
 import { downloadICSFile, scheduleAllTaskNotifications } from '../utils/notificationUtils';
 import { isPast } from 'date-fns';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useTheme } from '../hooks/useTheme';
+import clsx from 'clsx';
 
 export default function Timeline({
   exam,
@@ -13,14 +16,37 @@ export default function Timeline({
   onReset,
   onBack
 }) {
+  const { isDark } = useTheme();
+  const [customTasks, setCustomTasks] = useState([]);
+  const [showCustomForm, setShowCustomForm] = useState(false);
+
+  // Carregar tarefas customizadas do localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(`preparasns-custom-${exam.id}`);
+    if (saved) {
+      setCustomTasks(JSON.parse(saved));
+    }
+  }, [exam.id]);
+
+  // Guardar tarefas customizadas no localStorage
+  useEffect(() => {
+    localStorage.setItem(`preparasns-custom-${exam.id}`, JSON.stringify(customTasks));
+  }, [customTasks, exam.id]);
+
   // Calcular os tempos de todas as tarefas
   const tasks = exam.passos.map(passo => ({
     ...passo,
     scheduledTime: calculateTaskTime(examDateTime, passo.horas_antecedencia),
   }));
 
+  // Combinar tarefas originais com customizadas
+  const allTasks = [...tasks, ...customTasks.map(ct => ({
+    ...ct,
+    scheduledTime: new Date(ct.scheduledTime)
+  }))];
+
   // Ordenar as tarefas por tempo agendado (da mais próxima à mais distante)
-  const sortedTasks = [...tasks].sort((a, b) => b.scheduledTime - a.scheduledTime);
+  const sortedTasks = [...allTasks].sort((a, b) => b.scheduledTime - a.scheduledTime);
 
   // Calcular se a tarefa está atrasada
   const isTaskOverdue = (taskTime) => {
@@ -31,9 +57,9 @@ export default function Timeline({
   // Agendar notificações quando o componente montar
   useEffect(() => {
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      scheduleAllTaskNotifications(tasks);
+      scheduleAllTaskNotifications(allTasks);
     }
-  }, [tasks]);
+  }, [allTasks]);
 
   // Contar tarefas completas
   const completedCount = completedTasks.length;
@@ -41,11 +67,24 @@ export default function Timeline({
   const progressPercentage = (completedCount / totalCount) * 100;
 
   const handleExportCalendar = () => {
-    downloadICSFile(exam, examDateTime, tasks);
+    downloadICSFile(exam, examDateTime, allTasks);
+  };
+
+  const handleAddCustomTask = (task) => {
+    setCustomTasks([...customTasks, task]);
+    setShowCustomForm(false);
+  };
+
+  const handleToggleCustomTask = (taskId) => {
+    setCustomTasks(prev => prev.map(task =>
+      task.id === taskId
+        ? { ...task, isCompleted: !task.isCompleted }
+        : task
+    ));
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className={clsx('min-h-screen pb-32', isDark ? 'bg-gray-900' : 'bg-gray-50')}>
       {/* Header */}
       <div className="bg-gradient-to-r from-primary-blue to-blue-700 text-white p-6 sticky top-0 z-10 shadow-lg">
         <button
@@ -77,37 +116,65 @@ export default function Timeline({
       </div>
 
       {/* Aviso Geral */}
-      <div className="bg-blue-50 border-l-4 border-primary-blue p-4 m-6 rounded-2xl">
-        <p className="text-sm text-primary-blue">
+      <div className={clsx(
+        'border-l-4 border-primary-blue p-4 m-6 rounded-2xl',
+        isDark ? 'bg-gray-800 text-gray-300' : 'bg-blue-50 text-primary-blue'
+      )}>
+        <p className="text-sm">
           <strong>Nota importante:</strong> {exam.avisos_gerais}
         </p>
       </div>
 
-      {/* Botão Secundário: Exportar Calendário */}
-      <div className="px-6 mb-6 max-w-md mx-auto">
+      {/* Botões de Ação */}
+      <div className="px-6 mb-6 max-w-md mx-auto space-y-3">
         <button
           onClick={handleExportCalendar}
-          className="w-full flex items-center justify-center gap-2 bg-white border-2 border-primary-blue text-primary-blue font-semibold py-3 rounded-2xl hover:bg-blue-50 transition-colors"
+          className={clsx(
+            'w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-2xl transition-colors',
+            isDark
+              ? 'bg-gray-800 border-2 border-gray-700 text-primary-blue hover:bg-gray-700'
+              : 'bg-white border-2 border-primary-blue text-primary-blue hover:bg-blue-50'
+          )}
         >
           <Download className="w-5 h-5" />
           Adicionar ao Calendário
         </button>
+
+        <button
+          onClick={() => setShowCustomForm(true)}
+          className="w-full flex items-center justify-center gap-2 bg-success-green text-white font-semibold py-3 rounded-2xl hover:bg-green-700 transition-colors"
+        >
+          <Plus className="w-5 h-5" />
+          Adicionar Lembrete
+        </button>
       </div>
 
       {/* Lista de Tarefas */}
-      <div className="px-4 space-y-4 max-w-md mx-auto">
-        {sortedTasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            taskId={task.id}
-            title={task.titulo}
-            description={task.descricao_pt}
-            scheduledTime={formatDatetimePT(task.scheduledTime)}
-            isCompleted={completedTasks.includes(task.id)}
-            onToggle={onToggleTask}
-            isOverdue={isTaskOverdue(task.scheduledTime)}
-          />
-        ))}
+      <div className={clsx('px-4 space-y-4 max-w-md mx-auto', isDark && 'text-gray-100')}>
+        {sortedTasks.length === 0 ? (
+          <div className="text-center py-8">
+            <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>
+              Não há tarefas agendadas
+            </p>
+          </div>
+        ) : (
+          sortedTasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              taskId={task.id}
+              title={task.titulo}
+              description={task.descricao_pt}
+              scheduledTime={formatDatetimePT(task.scheduledTime)}
+              isCompleted={task.isCustom
+                ? task.isCompleted
+                : completedTasks.includes(task.id)
+              }
+              onToggle={task.isCustom ? handleToggleCustomTask : onToggleTask}
+              isOverdue={isTaskOverdue(task.scheduledTime)}
+              isCustom={task.isCustom}
+            />
+          ))
+        )}
       </div>
 
       {/* Botão de Reset - Flutuante */}
@@ -120,6 +187,15 @@ export default function Timeline({
           <RotateCcw className="w-6 h-6" />
         </button>
       </div>
+
+      {/* Modal de Tarefa Customizada */}
+      {showCustomForm && (
+        <CustomTaskForm
+          examDateTime={examDateTime}
+          onAdd={handleAddCustomTask}
+          onClose={() => setShowCustomForm(false)}
+        />
+      )}
     </div>
   );
 }
