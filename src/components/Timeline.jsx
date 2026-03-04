@@ -49,7 +49,7 @@ export default function Timeline({
   }))];
 
   // Ordenar as tarefas por tempo agendado (da mais próxima à mais distante)
-  const sortedTasks = [...allTasks].sort((a, b) => b.scheduledTime - a.scheduledTime);
+  const sortedTasks = [...allTasks].sort((a, b) => a.scheduledTime - b.scheduledTime);
 
   // Calcular se a tarefa está atrasada
   const isTaskOverdue = (taskTime) => {

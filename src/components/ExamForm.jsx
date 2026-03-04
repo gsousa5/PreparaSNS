@@ -3,8 +3,11 @@ import { Calendar, Clock } from 'lucide-react';
 import { examesData } from '../data/exames';
 import { calculateTimeSincePrepStart, formatDatetimePT } from '../utils/dateUtils';
 import AlertBox from './AlertBox';
+import { useTheme } from '../hooks/useTheme';
+import clsx from 'clsx';
 
 export default function ExamForm({ onExamSelected }) {
+  const { isDark } = useTheme();
   const [selectedExam, setSelectedExam] = useState('');
   const [examDate, setExamDate] = useState('');
   const [examTime, setExamTime] = useState('09:00');
@@ -84,26 +87,26 @@ export default function ExamForm({ onExamSelected }) {
   const maxPrepHours = selectedExamData ? Math.max(...selectedExamData.passos.map(p => p.horas_antecedencia)) : 0;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+    <div className={clsx('min-h-screen flex flex-col items-center justify-center p-6', isDark ? 'bg-gray-900' : 'bg-white')}>
       <div className="w-full flex flex-col items-center">
         <div className="text-center mb-12">
           <div className="w-16 h-16 bg-gradient-to-br from-primary-blue to-blue-700 rounded-3xl flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl font-bold text-white">P</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">PreparaSNS</h1>
-          <p className="text-gray-500 text-lg">Preparação para Exames Médicos</p>
+          <h1 className={clsx('text-4xl font-bold mb-2', isDark ? 'text-white' : 'text-gray-900')}>PreparaSNS</h1>
+          <p className={clsx('text-lg', isDark ? 'text-gray-400' : 'text-gray-500')}>Preparação para Exames Médicos</p>
         </div>
 
         <form onSubmit={handleSubmit} className="w-full space-y-8 max-w-md">
           {/* Seleção de Exame */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+            <label className={clsx('block text-sm font-semibold mb-3', isDark ? 'text-gray-300' : 'text-gray-700')}>
               Selecione o Exame
             </label>
             <select
               value={selectedExam}
               onChange={handleExamChange}
-              className="w-full px-4 py-4 border border-gray-200 rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-gray-800 font-medium"
+              className={clsx('w-full px-4 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent font-medium', isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-800')}
             >
               <option value="">-- Escolha o seu exame --</option>
               {examesData.map(exam => (
@@ -125,7 +128,7 @@ export default function ExamForm({ onExamSelected }) {
 
           {/* Data do Exame */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <label className={clsx('block text-sm font-semibold mb-3 flex items-center gap-2', isDark ? 'text-gray-300' : 'text-gray-700')}>
               <Calendar className="w-5 h-5 text-primary-blue" />
               Data do Exame
             </label>
@@ -134,7 +137,7 @@ export default function ExamForm({ onExamSelected }) {
               value={examDate}
               onChange={handleDateChange}
               min={minDate}
-              className="w-full px-4 py-4 border border-gray-200 rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent font-medium"
+              className={clsx('w-full px-4 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent font-medium', isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-800')}
             />
             {pastDateError && (
               <AlertBox
@@ -147,7 +150,7 @@ export default function ExamForm({ onExamSelected }) {
 
           {/* Hora do Exame */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <label className={clsx('block text-sm font-semibold mb-3 flex items-center gap-2', isDark ? 'text-gray-300' : 'text-gray-700')}>
               <Clock className="w-5 h-5 text-primary-blue" />
               Hora do Exame
             </label>
@@ -155,7 +158,7 @@ export default function ExamForm({ onExamSelected }) {
               type="time"
               value={examTime}
               onChange={handleTimeChange}
-              className="w-full px-4 py-4 border border-gray-200 rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent font-medium"
+              className={clsx('w-full px-4 py-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent font-medium', isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-800')}
             />
           </div>
 
@@ -170,8 +173,8 @@ export default function ExamForm({ onExamSelected }) {
 
           {/* Duração da Preparação */}
           {selectedExamData && !insufficientTimeError && examDate && (
-            <div className="bg-blue-50 border-l-4 border-primary-blue p-5 rounded-2xl">
-              <p className="text-sm text-primary-blue">
+            <div className={clsx('border-l-4 border-primary-blue p-5 rounded-2xl', isDark ? 'bg-gray-800 text-gray-300' : 'bg-blue-50 text-primary-blue')}>
+              <p className="text-sm">
                 <strong>Duração total da preparação:</strong> {maxPrepHours} horas
               </p>
             </div>
